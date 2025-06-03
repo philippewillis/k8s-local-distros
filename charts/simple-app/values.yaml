@@ -8,9 +8,6 @@ image:
 service:
   type: ClusterIP
   port: 80
-namespace:
-  create: true
-  name: simple-app
 ingress:
   enabled: true
   annotations:

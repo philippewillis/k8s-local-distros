@@ -135,19 +135,19 @@ k3d-dashboard:
 	kubectl proxy
 
 
-
+# Helm Charts
 helm-charts:
 	@echo "Installing Helm Charts..."
-	@kubectl delete namespace simple-app --ignore-not-found=true
 	@helm install simple-app ./charts/simple-app
 	@echo "Application should be available at: http://localhost"
 helm-delete:
 	@echo "Uninstalling Helm Charts..."
 	@helm uninstall simple-app --ignore-not-found
-	@kubectl delete namespace simple-app --ignore-not-found=true
 	@echo "Helm Charts uninstalled successfully."
 
 
+
+# DOCKER COMMANDS
 docker-build: docker-load-to-k3d
 	@echo "Building Docker image..."
 	@docker build -t hello-k8s:0.0.1 docker/.
