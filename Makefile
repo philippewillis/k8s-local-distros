@@ -148,7 +148,7 @@ helm-delete:
 	@echo "Helm Charts uninstalled successfully."
 
 
-docker-build:
+docker-build: docker-load-to-k3d
 	@echo "Building Docker image..."
 	@docker build -t hello-k8s:0.0.1 docker/.
 	@docker images | grep hello-k8s
