@@ -1,6 +1,7 @@
 .PHONY: k8s-apply k8s-delete \
 	minikube-start minikube-stop minikube-delete minikube-status minikube-dashboard minikube-ip \ 
-  kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress 
+  kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress \ 
+  k3d-cluster-create k3d-cluster-delete k3d-cluster-status k3d-dashboard
 
 # KUBERNETES COMMANDS
 k8s-apply:	
@@ -96,3 +97,32 @@ kind-status:
 kind-use-ingress:
 	@echo "Using Kind single node cluster ingress..."
 	kubectl apply --filename https://raw.githubusercontent.com/kubernetes/ingress-nginx/refs/heads/main/deploy/static/provider/kind/deploy.yaml
+
+
+
+# k8s local-distro -> K3D COMMANDS
+k3d-cluster-create:
+	@echo "Creating K3D cluster..."
+	k3d cluster create --config k3d/config-k3d.yml
+	@echo "K3D cluster created successfully."
+k3d-cluster-delete:
+	@echo "Deleting K3D cluster..."
+	k3d cluster delete my-k3d-cluster
+	@echo "K3D cluster deleted successfully."
+k3d-cluster-status:
+	@echo "Checking K3D cluster status..."
+	k3d cluster list
+	@echo "K3D cluster status checked successfully."
+k3d-dashboard:
+	@echo "Installing Kubernetes Dashboard..."
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+	@echo "Waiting for dashboard deployment..."
+	kubectl wait --for=condition=available --timeout=300s deployment/kubernetes-dashboard -n kubernetes-dashboard
+	@echo "Creating admin user..."
+	kubectl apply -f k3d/dashboard-admin.yml
+	@echo "Getting access token..."
+	@echo "Dashboard will be available at: http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/"
+	@echo "Use this token to login:"
+	@kubectl -n kubernetes-dashboard create token admin-user
+	@echo "Starting kubectl proxy (press Ctrl+C to stop)..."
+	kubectl proxy
