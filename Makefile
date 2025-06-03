@@ -1,20 +1,20 @@
 .PHONY: k8s-apply k8s-delete \
 	minikube-start minikube-stop minikube-delete minikube-status minikube-dashboard minikube-ip \ 
-  kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress
+  kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress 
 
 # KUBERNETES COMMANDS
 k8s-apply:	
 	@echo "Applying Kubernetes configurations..."
-	kubectl apply -f k8s/
+	kubectl apply -f k8s/hello-k8s/
 	@echo "Kubernetes configurations applied successfully."
 k8s-delete:
 	@echo "Deleting Kubernetes configurations..."
-	kubectl delete -f k8s/
+	kubectl delete -f k8s/hello-k8s/
 	@echo "Kubernetes configurations deleted successfully."
 
 
 
-# MINIKUBE COMMANDS
+# k8s local-distro -> MINIKUBE COMMANDS
 minikube-start:
 	@echo "Starting Minikube..."
 	minikube start
@@ -42,7 +42,7 @@ minikube-ip:
 
 
 
-# KIND COMMANDS
+# k8s local-distro -> KIND COMMANDS
 kind-single-node:
 	@echo "Creating Kind single node cluster..."
 	kind create cluster --name single-node --config kind/config-single-node.yml
@@ -96,4 +96,3 @@ kind-status:
 kind-use-ingress:
 	@echo "Using Kind single node cluster ingress..."
 	kubectl apply --filename https://raw.githubusercontent.com/kubernetes/ingress-nginx/refs/heads/main/deploy/static/provider/kind/deploy.yaml
-
