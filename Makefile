@@ -1,7 +1,7 @@
 .PHONY: k8s-apply k8s-delete \
 	minikube-start minikube-stop minikube-delete minikube-status minikube-dashboard minikube-ip \ 
-  kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress \ 
-  k3d-cluster-create k3d-cluster-delete k3d-cluster-status k3d-dashboard
+	kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress \ 
+	k3d-cluster-create k3d-cluster-delete k3d-cluster-status k3d-dashboard
 
 # KUBERNETES COMMANDS
 k8s-apply:	
