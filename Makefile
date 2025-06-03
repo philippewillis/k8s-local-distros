@@ -1,5 +1,6 @@
 .PHONY: k8s-apply k8s-delete \
-	minikube-start minikube-stop minikube-delete minikube-status minikube-dashboard minikube-ip
+	minikube-start minikube-stop minikube-delete minikube-status minikube-dashboard minikube-ip \ 
+  kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress
 
 # KUBERNETES COMMANDS
 k8s-apply:	
@@ -38,3 +39,61 @@ minikube-ip:
 	@echo "Getting Minikube IP..."
 	minikube ip
 	@echo "Minikube IP retrieved successfully."	
+
+
+
+# KIND COMMANDS
+kind-single-node:
+	@echo "Creating Kind single node cluster..."
+	kind create cluster --name single-node --config kind/config-single-node.yml
+	@echo "Kind single node cluster created successfully."
+	kubectl cluster-info --context kind-single-node
+kind-single-delete:
+	@echo "Deleting Kind single node cluster..."
+	kind delete cluster --name single-node
+	@echo "Kind single node cluster deleted successfully."
+use-kind-single-node:
+	@echo "Creating Kind single node cluster..."
+	@kubectl config use-context kind-single-node
+kind-multi-node:
+	@echo "Creating Kind multi node cluster..."
+	kind create cluster --name multi-node --config kind/config-multi-node.yml
+	@echo "Kind multi node cluster created successfully."
+kind-multi-delete:
+	@echo "Deleting Kind multi node cluster..."
+	kind delete cluster --name multi-node
+	@echo "Kind multi node cluster deleted successfully."
+use-kind-multi-node:
+	@echo "Creating Kind multi node cluster..."
+	@kubectl config use-context kind-multi-node
+
+kind-dashboard:
+	@echo "Deploying Kubernetes Dashboard..."
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+	@echo "Creating admin-user and clusterrolebinding..."
+	kubectl create serviceaccount admin-user -n kubernetes-dashboard --dry-run=client -o yaml | kubectl apply -f -
+	kubectl create clusterrolebinding admin-user-binding \
+	  --clusterrole=cluster-admin \
+	  --serviceaccount=kubernetes-dashboard:admin-user \
+	  --dry-run=client -o yaml | kubectl apply -f -
+	@echo "Port forwarding dashboard to https://localhost:8443 (CTRL+C to stop)..."
+	@echo "Use the following token to log in:"
+	kubectl -n kubernetes-dashboard create token admin-user
+	kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard 8443:443
+	@echo "Kubernetes Dashboard deployed successfully. Access it at: https://localhost:8443"
+kind-ip:
+	@echo "Getting Kind single node cluster IP..."
+	@kind get clusters | grep single-node || echo "No single node cluster found."
+	@echo "Kind single node cluster IP retrieved successfully (if applicable)."
+kind-logs:
+	@echo "Getting logs for Kind single node cluster..."
+	kind export logs --name single-node
+	@echo "Logs for Kind single node cluster retrieved successfully."
+kind-status:
+	@echo "Checking Kind single node cluster status..."
+	kind get clusters
+	@echo "Kind single node cluster status checked successfully."
+kind-use-ingress:
+	@echo "Using Kind single node cluster ingress..."
+	kubectl apply --filename https://raw.githubusercontent.com/kubernetes/ingress-nginx/refs/heads/main/deploy/static/provider/kind/deploy.yaml
+
