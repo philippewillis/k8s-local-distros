@@ -9,6 +9,9 @@ ports:
   - port: 80:80
     nodeFilters:
       - loadbalancer
+  - port: 8000:80
+    nodeFilters:
+      - loadbalancer
   # - port: 443:443
   #   nodeFilters:
   #     - loadbalancer
