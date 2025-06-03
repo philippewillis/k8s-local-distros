@@ -2,7 +2,8 @@
 	minikube-start minikube-stop minikube-delete minikube-status minikube-dashboard minikube-ip \ 
 	kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress \ 
 	k3d-cluster-create k3d-cluster-delete k3d-cluster-status k3d-dashboard \
-	helm-charts helm-delete
+	helm-charts helm-delete \
+	docker-build docker-run
 
 # KUBERNETES COMMANDS
 k8s-apply:	
@@ -135,13 +136,26 @@ k3d-dashboard:
 
 
 
-helm-charts: k3d-use-ingress
+helm-charts:
 	@echo "Installing Helm Charts..."
-	@helm install simple-app ./charts/simple-app --namespace simple-app --create-namespace
+	# Clean up any existing namespace that wasn't created by Helm
+	@kubectl delete namespace simple-app --ignore-not-found=true
+	# Make sure you enable (k3d-use-ingress)
+	@helm install simple-app ./charts/simple-app
 	@echo "Application should be available at: http://localhost"
 
 helm-delete:
 	@echo "Uninstalling Helm Charts..."
-	@helm uninstall simple-app --namespace simple-app
-	@kubectl delete namespace simple-app
+	@helm uninstall simple-app --ignore-not-found
+	@kubectl delete namespace simple-app --ignore-not-found=true
 	@echo "Helm Charts uninstalled successfully."
+
+
+docker-build:
+	@echo "Building Docker image..."
+	@docker build -t hello-k8s:0.0.1 docker/.
+	@docker images | grep hello-k8s
+	@echo "Docker image built successfully."	
+docker-run:
+	@echo "Running Docker container (hello-k8s:0.0.1) at http://localhost:8081 ..."
+	@docker run --rm -p 8081:80 --name hello-k8s hello-k8s:0.0.1
