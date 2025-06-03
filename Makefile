@@ -138,12 +138,9 @@ k3d-dashboard:
 
 helm-charts:
 	@echo "Installing Helm Charts..."
-	# Clean up any existing namespace that wasn't created by Helm
 	@kubectl delete namespace simple-app --ignore-not-found=true
-	# Make sure you enable (k3d-use-ingress)
 	@helm install simple-app ./charts/simple-app
 	@echo "Application should be available at: http://localhost"
-
 helm-delete:
 	@echo "Uninstalling Helm Charts..."
 	@helm uninstall simple-app --ignore-not-found
@@ -159,3 +156,7 @@ docker-build:
 docker-run:
 	@echo "Running Docker container (hello-k8s:0.0.1) at http://localhost:8081 ..."
 	@docker run --rm -p 8081:80 --name hello-k8s hello-k8s:0.0.1
+docker-load-to-k3d:
+	@echo "Loading Docker image into K3D cluster..."
+	@k3d image import hello-k8s:0.0.1 --cluster my-k3d-cluster
+	@echo "Docker image loaded into K3D cluster successfully."
