@@ -1,7 +1,8 @@
 .PHONY: k8s-apply k8s-delete \
 	minikube-start minikube-stop minikube-delete minikube-status minikube-dashboard minikube-ip \ 
 	kind-single-node kind-single-delete use-kind-single-node kind-multi-node kind-multi-delete use-kind-multi-node kind-dashboard kind-ip kind-logs kind-status kind-use-ingress \ 
-	k3d-cluster-create k3d-cluster-delete k3d-cluster-status k3d-dashboard
+	k3d-cluster-create k3d-cluster-delete k3d-cluster-status k3d-dashboard \
+	helm-charts helm-delete
 
 # KUBERNETES COMMANDS
 k8s-apply:	
@@ -113,6 +114,11 @@ k3d-cluster-status:
 	@echo "Checking K3D cluster status..."
 	k3d cluster list
 	@echo "K3D cluster status checked successfully."
+k3d-use-ingress:
+	@echo "Installing Traefik ingress for K3D..."
+	@echo "Traefik is already installed with k3d, checking status..."
+	kubectl wait --namespace kube-system --for=condition=ready pod --selector=app.kubernetes.io/name=traefik --timeout=90s
+	@echo "Traefik ingress controller is ready."
 k3d-dashboard:
 	@echo "Installing Kubernetes Dashboard..."
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
@@ -126,3 +132,16 @@ k3d-dashboard:
 	@kubectl -n kubernetes-dashboard create token admin-user
 	@echo "Starting kubectl proxy (press Ctrl+C to stop)..."
 	kubectl proxy
+
+
+
+helm-charts: k3d-use-ingress
+	@echo "Installing Helm Charts..."
+	@helm install simple-app ./charts/simple-app --namespace simple-app --create-namespace
+	@echo "Application should be available at: http://localhost"
+
+helm-delete:
+	@echo "Uninstalling Helm Charts..."
+	@helm uninstall simple-app --namespace simple-app
+	@kubectl delete namespace simple-app
+	@echo "Helm Charts uninstalled successfully."
